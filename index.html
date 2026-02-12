@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel de Assistentes | UFCAT</title>
+    <style>
+        :root {
+            --primary: #2c3e50;
+            --accent: #2980b9;
+            --bg: #f4f7f6;
+            --text: #333;
+        }
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .portal-container {
+            text-align: center;
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            max-width: 500px;
+            width: 90%;
+        }
+        h1 {
+            color: var(--primary);
+            margin-bottom: 10px;
+            font-size: 1.8rem;
+        }
+        p {
+            color: #666;
+            margin-bottom: 30px;
+        }
+        .menu-grid {
+            display: grid;
+            gap: 15px;
+        }
+        .menu-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            text-decoration: none;
+            color: white;
+            border-radius: 10px;
+            transition: transform 0.2s, filter 0.2s;
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+        .menu-item:hover {
+            transform: translateY(-3px);
+            filter: brightness(1.1);
+        }
+        .btn-servicos { background-color: #27ae60; }
+        .btn-bolsas { background-color: #2980b9; }
+        
+        .icon {
+            font-size: 2rem;
+            margin-bottom: 8px;
+        }
+        .footer {
+            margin-top: 30px;
+            font-size: 0.8rem;
+            color: #999;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="portal-container">
+        <h1>Assistentes de Despacho</h1>
+        <p>Selecione o módulo que deseja operar:</p>
+
+        <div class="menu-grid">
+            <a href="servicos.html" class="menu-item btn-servicos">
+                <span class="icon">📑</span>
+                Notas Fiscais e Serviços
+            </a>
+            
+            <a href="bolsas.html" class="menu-item btn-bolsas">
+                <span class="icon">🎓</span>
+                Bolsas e Créditos
+            </a>
+        </div>
+
+        <div class="footer">
+           <br>
+            Acesso Restrito ao Setor Administrativo
+        </div>
+    </div>
+
+</body>
+</html>

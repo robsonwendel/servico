@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestão de Despachos | VPS</title>
+    <style>
+        :root { --p: #2c3e50; --s: #34495e; --acc: #27ae60; --inf: #2980b9; --err: #c0392b; --bg: #f1f2f6; }
+        body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); display: flex; justify-content: center; align-items: flex-start; padding: 20px; gap: 20px; flex-wrap: wrap; margin: 0; }
+        .card { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); width: 480px; }
+        .card-lg { width: 100%; max-width: 1100px; }
+        h2 { text-align: center; color: var(--p); font-size: 1.2rem; border-bottom: 2px solid #eee; padding-bottom: 10px; margin-top: 0; }
+        textarea { width: 100%; height: 110px; border: 1px solid #ddd; border-radius: 6px; padding: 10px; box-sizing: border-box; font-size: 13px; }
+        .grid { display: grid; grid-template-columns: 85px 1fr 45px; gap: 8px; align-items: center; margin-top: 10px; }
+        .grid label { font-size: 12px; font-weight: bold; color: var(--s); text-align: right; }
+        .grid input, .grid select { width: 100%; padding: 7px; border: 1px solid #ccc; border-radius: 4px; font-size: 13px; }
+        .btn { border: none; border-radius: 4px; cursor: pointer; padding: 8px; transition: 0.2s; background: var(--s); color: white; }
+        .btn:hover { opacity: 0.9; }
+        .btn-main { background: var(--acc); width: 100%; font-weight: bold; padding: 12px; margin: 10px 0; font-size: 14px; }
+        .btn-save { background: var(--inf); width: 100%; font-weight: bold; margin-top: 10px; }
+        .btn-clear { background: #95a5a6; width: 100%; margin-top: 5px; font-size: 11px; }
+        .opt { grid-column: 1 / span 3; display: flex; justify-content: space-around; background: #f9f9f9; padding: 8px; border-radius: 5px; font-size: 11px; border: 1px solid #eee; }
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 12px; }
+        th { background: var(--p); color: white; padding: 10px; text-align: left; }
+        td { padding: 8px; border-bottom: 1px solid #eee; }
+        .actions { display: flex; gap: 5px; margin-bottom: 10px; }
+    </style>
+</head>
+<body>
+
+    <div class="card">
+        <h2>1. Dados do Comprasnet</h2>
+        <textarea id="in" placeholder="Cole os dados aqui..."></textarea>
+        <button onclick="extrair()" class="btn btn-main">⚡ EXTRAIR DADOS</button>
+        
+        <div class="grid">
+            <label>Tipo Doc.</label>
+            <select id="tipo_doc"><option>NF</option><option>DOC</option><option>Fatura</option></select>
+            <div></div>
+            <label>Processo</label><input type="text" id="processo"> <button class="btn" onclick="copy('processo')">📋</button>
+            <label>CNPJ</label><input type="text" id="cnpj"> <button class="btn" onclick="copy('cnpj')">📋</button>
+            <label>Nº Doc</label><input type="text" id="nf"> <button class="btn" onclick="copy('nf')">📋</button>
+            <label>Valor R$</label><input type="text" id="valor"> <button class="btn" onclick="copy('valor')">📋</button>
+            <label>Emissão</label><input type="text" id="data_emissao"> <button class="btn" onclick="copy('data_emissao')">📋</button>
+            <label>REF.</label><input type="text" id="ref"> <button class="btn" onclick="copy('ref')">📋</button>
+            <label>Ref. Serv.</label><input type="text" id="ref_servico"> <button class="btn" onclick="copy('ref_servico')">📋</button>
+            <label>Contrato</label><input type="text" id="contrato"> <button class="btn" onclick="copy('contrato')">📋</button>
+            <label>Fonte</label><input type="text" id="fonte"> <button class="btn" onclick="copy('fonte')">📋</button>
+            <label>Simples?</label>
+            <select id="simples"><option value="Não">Não</option><option value="Sim">Sim</option></select>
+            <div></div>
+            <div class="opt">
+                <label><input type="checkbox" id="check_ref" checked> Ref. Serv.</label>
+                <label><input type="checkbox" id="check_con" checked> Contrato</label>
+            </div>
+        </div>
+        <button onclick="limpar()" class="btn btn-clear">Limpar Campos</button>
+    </div>
+
+    <div class="card">
+        <h2>2. Despacho</h2>
+        <div class="actions">
+            <button class="btn" style="flex:1" onclick="gerar('LIQUIDAÇÃO')">Liquidação</button>
+            <button class="btn" style="flex:1" onclick="gerar('PAGAMENTO')">Pagamento</button>
+            <button class="btn" style="flex:1" onclick="gerar('TRIB. FED.')">TRIB</button>
+            <button class="btn" style="flex:1" onclick="gerar('ISS')">ISS</button>
+        </div>
+        <textarea id="out" style="height: 150px; font-weight: bold; border-color: var(--inf); color: var(--p);"></textarea>
+        <button onclick="salvar()" class="btn btn-save">💾 SALVAR NO HISTÓRICO</button>
+    </div>
+
+    <div class="card card-lg">
+        <h2>3. Histórico de Atividades</h2>
+        <div class="actions">
+            <button class="btn" style="background:var(--acc)" onclick="exportar()">📥 Exportar Excel (CSV)</button>
+            <button class="btn" style="background:var(--err); margin-left: auto;" onclick="limparDB()">🗑️ Apagar Tudo</button>
+        </div>
+        <div style="overflow-x:auto">
+            <table id="tb">
+                <thead><tr><th>Data</th><th>Processo</th><th>Doc</th><th>Valor</th><th>Despacho</th></tr></thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
+
+<script>
+    window.onload = listar;
+    function extrair() {
+        const t = document.getElementById('in').value;
+        const r = {
+            contrato: /Contrato\s+([\d\/]+)/, nf: /Número do\s+Documento\s+([\d\.]+)/,
+            data_emissao: /Dt\.\s+Emissão\s+([\d\/]+)/, valor: /Valor\s+R\$\s*([\d\.,]+)/,
+            processo: /Processo\s+([\d\.\/\-]+)/, cnpj: /Fornecedor\s+([\d\.\/\-]+)/,
+            ref: /Referência\s+Ano Mês Valor\s+(\d{4})\s+(\d{2})/
+        };
+        for(let k in r) {
+            let m = t.match(r[k]);
+            if(m) {
+                if(k === 'ref') document.getElementById('ref').value = `${m[2]}/${m[1]}`;
+                else document.getElementById(k).value = m[1].trim();
+            }
+        }
+    }
+    function gerar(acao) {
+        const v = (id) => document.getElementById(id).value;
+        let d = `${acao} DA ${v('tipo_doc')} ${v('nf')} DE ${v('data_emissao')} - VALOR R$ ${v('valor')} - REF. ${v('ref')}`;
+        if(document.getElementById('check_ref').checked && v('ref_servico')) d += ` - REF. SERVIÇO ${v('ref_servico')}`;
+        if(document.getElementById('check_con').checked && v('contrato')) d += ` - CONTRATO ${v('contrato')}`;
+        d += ` - PROCESSO: ${v('processo')} - FONTE: ${v('fonte')}`;
+        if(v('simples') === 'Sim') d += ' - OPTANTE DO SIMPLES NACIONAL';
+        document.getElementById('out').value = d.toUpperCase();
+    }
+    async function copy(id) {
+        await navigator.clipboard.writeText(document.getElementById(id).value);
+    }
+    function salvar() {
+        const d = document.getElementById('out').value;
+        if(!d) return;
+        const reg = { 
+            ts: new Date().toLocaleString('pt-BR'), 
+            pr: document.getElementById('processo').value,
+            doc: document.getElementById('nf').value,
+            val: document.getElementById('valor').value,
+            txt: d 
+        };
+        let db = JSON.parse(localStorage.getItem('db_desp') || '[]');
+        db.unshift(reg);
+        localStorage.setItem('db_desp', JSON.stringify(db));
+        listar();
+    }
+    function listar() {
+        const db = JSON.parse(localStorage.getItem('db_desp') || '[]');
+        const b = document.querySelector('#tb tbody');
+        b.innerHTML = db.map(i => `<tr><td>${i.ts}</td><td>${i.pr}</td><td>${i.doc}</td><td>${i.val}</td><td title="${i.txt}">${i.txt.substring(0,60)}...</td></tr>`).join('');
+    }
+    function exportar() {
+        const db = JSON.parse(localStorage.getItem('db_desp') || '[]');
+        let c = "\uFEFFData;Processo;Documento;Valor;Despacho\n";
+        db.forEach(i => c += `${i.ts};${i.pr};${i.doc};${i.val};"${i.txt}"\n`);
+        const l = document.createElement("a");
+        l.href = URL.createObjectURL(new Blob([c], {type:'text/csv'}));
+        l.download = "despachos.csv";
+        l.click();
+    }
+    function limpar() {
+        ['in','processo','cnpj','nf','valor','data_emissao','ref','ref_servico','contrato','fonte','out'].forEach(id => document.getElementById(id).value = '');
+    }
+    function limparDB() { if(confirm("Apagar histórico?")) { localStorage.removeItem('db_desp'); listar(); } }
+</script>
+</body>
+</html>

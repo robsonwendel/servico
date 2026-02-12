@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Assistente de Despachos | Bolsas e Crédito</title>
+    <style>
+        :root { --p: #2c3e50; --s: #34495e; --acc: #27ae60; --inf: #2980b9; --err: #c0392b; --bg: #f1f2f6; }
+        body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); display: flex; justify-content: center; align-items: flex-start; padding: 20px; gap: 20px; flex-wrap: wrap; margin: 0; }
+        .card { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); width: 480px; }
+        .card-lg { width: 100%; max-width: 1100px; }
+        h2 { text-align: center; color: var(--p); font-size: 1.2rem; border-bottom: 2px solid #eee; padding-bottom: 10px; margin-top: 0; }
+        textarea { width: 100%; height: 110px; border: 1px solid #ddd; border-radius: 6px; padding: 10px; box-sizing: border-box; font-size: 13px; }
+        .grid { display: grid; grid-template-columns: 85px 1fr 45px; gap: 8px; align-items: center; margin-top: 10px; }
+        .grid label { font-size: 12px; font-weight: bold; color: var(--s); text-align: right; }
+        .grid input, .grid select { width: 100%; padding: 7px; border: 1px solid #ccc; border-radius: 4px; font-size: 13px; }
+        .btn { border: none; border-radius: 4px; cursor: pointer; padding: 8px; transition: 0.2s; background: var(--s); color: white; }
+        .btn:hover { opacity: 0.9; }
+        .btn-main { background: var(--inf); width: 100%; font-weight: bold; padding: 12px; margin: 10px 0; font-size: 14px; border: none; color: white; border-radius: 8px; }
+        .btn-save { background: var(--p); width: 100%; font-weight: bold; margin-top: 10px; }
+        .btn-clear { background: #95a5a6; width: 100%; margin-top: 5px; font-size: 11px; }
+        .opt { grid-column: 1 / span 3; display: flex; justify-content: space-around; background: #f9f9f9; padding: 8px; border-radius: 5px; font-size: 11px; border: 1px solid #eee; margin: 5px 0; }
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 12px; }
+        th { background: var(--p); color: white; padding: 10px; text-align: left; }
+        td { padding: 8px; border-bottom: 1px solid #eee; }
+        .actions { display: flex; gap: 5px; margin-bottom: 10px; }
+    </style>
+</head>
+<body>
+
+    <div class="card">
+        <h2>1. Dados do Despacho/Bolsa</h2>
+        <textarea id="in" placeholder="Cole o texto do despacho aqui para extrair os dados..."></textarea>
+        <button onclick="processarTexto()" class="btn btn-main">⚡ EXTRAIR DADOS</button>
+        
+        <div class="grid">
+            <label>Processo</label><input type="text" id="processo"> <button class="btn" onclick="copy('processo')">📋</button>
+            <label>Data Emis.</label><input type="text" id="emissao"> <button class="btn" onclick="copy('emissao')">📋</button>
+            <label>REL. PG</label><input type="text" id="relpg"> <button class="btn" onclick="copy('relpg')">📋</button>
+            <label>REF.</label><input type="text" id="ref"> <button class="btn" onclick="copy('ref')">📋</button>
+            <label>Desc. Bolsa</label><input type="text" id="descbolsa"> <button class="btn" onclick="copy('descbolsa')">📋</button>
+            <label>Valor R$</label><input type="text" id="valor"> <button class="btn" onclick="copy('valor')">📋</button>
+            <label>FONTE</label><input type="text" id="fonte"> <button class="btn" onclick="copy('fonte')">📋</button>
+            <label>Empenho</label><input type="text" id="empenho"> <button class="btn" onclick="copy('empenho')">📋</button>
+            
+            <div class="opt">
+                <label><input type="checkbox" id="check_desc" checked> Incluir Desc. Bolsa</label>
+                <label><input type="checkbox" id="check_fonte" checked> Incluir Fonte</label>
+            </div>
+        </div>
+        <button onclick="limparCampos()" class="btn btn-clear">Limpar Campos</button>
+    </div>
+
+    <div class="card">
+        <h2>2. Gerar Novo Despacho</h2>
+        <div class="actions">
+            <button class="btn" style="flex:1" onclick="gerarDespacho('LIQUIDAÇÃO')">Liquidação</button>
+            <button class="btn" style="flex:1" onclick="gerarDespacho('PAGAMENTO')">Pagamento</button>
+            <button class="btn" style="flex:1" onclick="gerarDespacho('TRIB. FED.')">TRIB</button>
+            <button class="btn" style="flex:1" onclick="gerarDespacho('ISS')">ISS</button>
+        </div>
+        <textarea id="out" style="height: 150px; font-weight: bold; border-color: var(--inf); color: var(--p);"></textarea>
+        <button onclick="salvarHistorico()" class="btn btn-save">💾 SALVAR NO HISTÓRICO</button>
+    </div>
+
+    <div class="card card-lg">
+        <h2>3. Histórico de Atividades (Navegador)</h2>
+        <div class="actions">
+            <button class="btn" style="background:var(--acc)" onclick="exportarExcel()">📥 Exportar Excel (CSV)</button>
+            <button class="btn" style="background:var(--err); margin-left: auto;" onclick="limparBanco()">🗑️ Apagar Tudo</button>
+        </div>
+        <div style="overflow-x:auto">
+            <table id="tabelaHistorico">
+                <thead><tr><th>Data/Hora</th><th>Processo</th><th>REL. PG</th><th>Valor</th><th>Despacho</th></tr></thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
+
+<script>
+    window.onload = atualizarTabela;
+
+    function processarTexto() {
+        const texto = document.getElementById('in').value;
+        const regex = {
+            processo: /(?:Processo nº)\s*([\d\.\/\-]+)|(?:Número do Processo:)\s*([\d\.\/\-]+)|\s*\|\s*NÚMERO DO PROCESSO\s*\|\s*([\d\.\/\-]+)/i,
+            emissao: /(?:Data de Emissão.*:)\s*(\d{2}\/\d{2}\/\d{4})|\s*\|\s*Data de Emissão.*\|\s*(\d{2}\/\d{2}\/\d{4})/i,
+            relpg: /(?:Relação de Crédito\s*\((\d+)\))|(?:REL\. PG.*:\s*(.*))|\s*\|\s*REL\. PG.*\s*\|\s*(\d+)/i,
+            ref: /(?:referente ao mês de)\s*([a-zA-ZÇç]+\/\d{4})|(?:REF\..*:)\s*([a-zA-ZÇç]+\/\d{4})|\s*\|\s*REF\..*\|\s*([a-zA-ZÇç]+\/\d{4})/i,
+            descbolsa: /(?:do\s*(Programa de.*?),)|(?:Descrição da Bolsa:\s*(.*))|\s*\|\s*DESCRIÇÃO DA BOLSA\s*\|\s*([^|]+)/i,
+            valor: /(?:valor de)\s*R\$\s*([\d\.\,]+)|(?:Valor Total:)\s*R\$\s*([\d\.\,]+)|\|\s*Valor TOTAL\s*\|\s*R\$\s*([\d\.\,]+)/i,
+            ateste: /(?:\*?\s*Data de Ateste:)\s*(\d{2}\/\d{2}\/\d{4})|\s*\|\s*DATA DE Ateste.*\|\s*(\d{2}\/\d{2}\/\d{4})/i
+        };
+
+        for (const chave in regex) {
+            const match = texto.match(regex[chave]);
+            if (match) {
+                const valorCapturado = match[1] || match[2] || match[3] || "";
+                if (valorCapturado) {
+                    document.getElementById(chave === 'ateste' ? 'emissao' : chave).value = valorCapturado.trim();
+                }
+            }
+        }
+    }
+
+    function gerarDespacho(tipo) {
+        const v = (id) => document.getElementById(id).value || `[${id.toUpperCase()} PENDENTE]`;
+        const incluirDesc = document.getElementById('check_desc').checked;
+        const incluirFonte = document.getElementById('check_fonte').checked;
+
+        let d = `${tipo} DA REL. PG ${v('relpg')} DE ${v('emissao')} - VALOR R$ ${v('valor')} - REF. ${v('ref')}`;
+        
+        if(incluirDesc && document.getElementById('descbolsa').value) {
+            d += ` - REF. ${v('descbolsa')}`;
+        }
+        
+        d += ` - PROCESSO: ${v('processo')}`;
+        
+        if(incluirFonte && document.getElementById('fonte').value) {
+            d += ` - FONTE: ${v('fonte')}`;
+        }
+
+        document.getElementById('out').value = d.toUpperCase();
+    }
+
+    async function copy(id) {
+        const val = document.getElementById(id).value;
+        const texto = (id === 'relpg') ? 'REL. PG ' + val : val;
+        await navigator.clipboard.writeText(texto);
+    }
+
+    function salvarHistorico() {
+        const despacho = document.getElementById('out').value;
+        if(!despacho) return alert("Gere um despacho primeiro!");
+
+        const reg = {
+            ts: new Date().toLocaleString('pt-BR'),
+            pr: document.getElementById('processo').value,
+            pg: document.getElementById('relpg').value,
+            val: document.getElementById('valor').value,
+            txt: despacho
+        };
+
+        let db = JSON.parse(localStorage.getItem('db_bolsas') || '[]');
+        db.unshift(reg);
+        localStorage.setItem('db_bolsas', JSON.stringify(db));
+        atualizarTabela();
+    }
+
+    function atualizarTabela() {
+        const db = JSON.parse(localStorage.getItem('db_bolsas') || '[]');
+        const b = document.querySelector('#tabelaHistorico tbody');
+        b.innerHTML = db.map(i => `<tr><td>${i.ts}</td><td>${i.pr}</td><td>${i.pg}</td><td>${i.val}</td><td title="${i.txt}">${i.txt.substring(0,60)}...</td></tr>`).join('');
+    }
+
+    function exportarExcel() {
+        const db = JSON.parse(localStorage.getItem('db_bolsas') || '[]');
+        let c = "\uFEFFData;Processo;Rel_PG;Valor;Despacho_Completo\n";
+        db.forEach(i => c += `${i.ts};${i.pr};${i.pg};${i.val};"${i.txt}"\n`);
+        const l = document.createElement("a");
+        l.href = URL.createObjectURL(new Blob([c], {type:'text/csv'}));
+        l.download = "historico_bolsas.csv";
+        l.click();
+    }
+
+    function limparCampos() {
+        ['in','processo','emissao','relpg','ref','descbolsa','valor','fonte','empenho','out'].forEach(id => document.getElementById(id).value = '');
+    }
+
+    function limparBanco() {
+        if(confirm("Deseja apagar todo o histórico de bolsas?")) {
+            localStorage.removeItem('db_bolsas');
+            atualizarTabela();
+        }
+    }
+</script>
+</body>
+</html>

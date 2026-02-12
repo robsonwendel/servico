@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gestão de Despachos | VPS</title>
+    <title>Gestão de Despachos | VPS UFCAT</title>
     <style>
         :root { --p: #2c3e50; --s: #34495e; --acc: #27ae60; --inf: #2980b9; --err: #c0392b; --bg: #f1f2f6; }
         body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); display: flex; justify-content: center; align-items: flex-start; padding: 20px; gap: 20px; flex-wrap: wrap; margin: 0; }
@@ -24,6 +24,7 @@
         th { background: var(--p); color: white; padding: 10px; text-align: left; }
         td { padding: 8px; border-bottom: 1px solid #eee; }
         .actions { display: flex; gap: 5px; margin-bottom: 10px; }
+        #siorg { background-color: #e9ecef; font-weight: bold; color: #495057; }
     </style>
 </head>
 <body>
@@ -45,7 +46,17 @@
             <label>REF.</label><input type="text" id="ref"> <button class="btn" onclick="copy('ref')">📋</button>
             <label>Ref. Serv.</label><input type="text" id="ref_servico"> <button class="btn" onclick="copy('ref_servico')">📋</button>
             <label>Contrato</label><input type="text" id="contrato"> <button class="btn" onclick="copy('contrato')">📋</button>
+            
+            <label title="UGR Centro de Custo (SIPAC)">C. Custo</label>
+            <input type="text" id="centro_custo" placeholder="Ex: 157128" onkeyup="buscarSiorg()"> 
+            <button class="btn" onclick="copy('centro_custo')">📋</button>
+
+            <label title="SIORG (SIAFI)">SIORG</label>
+            <input type="text" id="siorg" readonly placeholder="Código SIORG"> 
+            <button class="btn" onclick="copy('siorg')">📋</button>
+
             <label>Fonte</label><input type="text" id="fonte"> <button class="btn" onclick="copy('fonte')">📋</button>
+            
             <label>Simples?</label>
             <select id="simples"><option value="Não">Não</option><option value="Sim">Sim</option></select>
             <div></div>
@@ -84,6 +95,29 @@
     </div>
 
 <script>
+    // Banco de dados SIORG - UFCAT
+    const mapeamentoSiorg = {
+        "157158": "282868", "157159": "284833", "157148": "244268", "157127": "218145",
+        "157151": "282854", "157152": "282856", "157396": "304420", "157397": "304125",
+        "157398": "387089", "157399": "387129", "157400": "284912", "157153": "282855",
+        "157154": "284832", "157155": "244894", "157129": "207865", "157130": "207870",
+        "157128": "244270", "157131": "207868", "157132": "207864", "157133": "207867",
+        "157134": "207866", "157135": "207869", "157136": "207863", "157137": "282920",
+        "157156": "282866", "157401": "284937", "157402": "282908", "157403": "293029",
+        "157404": "282914", "157406": "282915", "157407": "293047", "157408": "293037",
+        "157409": "282919", "157353": "293054", "157410": "284944", "157411": "293039",
+        "157412": "293044", "157413": "284942", "157138": "304381", "157139": "218253",
+        "157140": "244313", "157141": "218314", "157142": "218182", "157231": "218160",
+        "157143": "218141", "157157": "282867", "157144": "282858", "157146": "244895",
+        "157147": "218137", "157414": "284866"
+    };
+
+    function buscarSiorg() {
+        const cc = document.getElementById('centro_custo').value;
+        const siorgInput = document.getElementById('siorg');
+        siorgInput.value = mapeamentoSiorg[cc] || "";
+    }
+
     window.onload = listar;
     function extrair() {
         const t = document.getElementById('in').value;
@@ -101,18 +135,29 @@
             }
         }
     }
+
     function gerar(acao) {
         const v = (id) => document.getElementById(id).value;
         let d = `${acao} DA ${v('tipo_doc')} ${v('nf')} DE ${v('data_emissao')} - VALOR R$ ${v('valor')} - REF. ${v('ref')}`;
         if(document.getElementById('check_ref').checked && v('ref_servico')) d += ` - REF. SERVIÇO ${v('ref_servico')}`;
         if(document.getElementById('check_con').checked && v('contrato')) d += ` - CONTRATO ${v('contrato')}`;
+        
+        // Se houver SIORG, pode-se incluir no texto se desejar, senão mantém o padrão:
         d += ` - PROCESSO: ${v('processo')} - FONTE: ${v('fonte')}`;
+        
         if(v('simples') === 'Sim') d += ' - OPTANTE DO SIMPLES NACIONAL';
         document.getElementById('out').value = d.toUpperCase();
     }
+
     async function copy(id) {
-        await navigator.clipboard.writeText(document.getElementById(id).value);
+        const input = document.getElementById(id);
+        if(input.value) {
+            await navigator.clipboard.writeText(input.value);
+            input.style.backgroundColor = "#d4edda";
+            setTimeout(() => input.style.backgroundColor = id === 'siorg' ? '#e9ecef' : '', 500);
+        }
     }
+
     function salvar() {
         const d = document.getElementById('out').value;
         if(!d) return;
@@ -128,11 +173,13 @@
         localStorage.setItem('db_desp', JSON.stringify(db));
         listar();
     }
+
     function listar() {
         const db = JSON.parse(localStorage.getItem('db_desp') || '[]');
         const b = document.querySelector('#tb tbody');
         b.innerHTML = db.map(i => `<tr><td>${i.ts}</td><td>${i.pr}</td><td>${i.doc}</td><td>${i.val}</td><td title="${i.txt}">${i.txt.substring(0,60)}...</td></tr>`).join('');
     }
+
     function exportar() {
         const db = JSON.parse(localStorage.getItem('db_desp') || '[]');
         let c = "\uFEFFData;Processo;Documento;Valor;Despacho\n";
@@ -142,9 +189,11 @@
         l.download = "despachos.csv";
         l.click();
     }
+
     function limpar() {
-        ['in','processo','cnpj','nf','valor','data_emissao','ref','ref_servico','contrato','fonte','out'].forEach(id => document.getElementById(id).value = '');
+        ['in','processo','cnpj','nf','valor','data_emissao','ref','ref_servico','contrato','fonte','out','centro_custo','siorg'].forEach(id => document.getElementById(id).value = '');
     }
+
     function limparDB() { if(confirm("Apagar histórico?")) { localStorage.removeItem('db_desp'); listar(); } }
 </script>
 </body>

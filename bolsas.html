@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Assistente de Despachos | Bolsas e Crédito</title>
+    <title>Assistente de Despachos | Bolsas UFCAT</title>
     <style>
         :root { --p: #2c3e50; --s: #34495e; --acc: #27ae60; --inf: #2980b9; --err: #c0392b; --bg: #f1f2f6; }
         body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); display: flex; justify-content: center; align-items: flex-start; padding: 20px; gap: 20px; flex-wrap: wrap; margin: 0; }
@@ -13,12 +13,12 @@
         textarea { width: 100%; height: 110px; border: 1px solid #ddd; border-radius: 6px; padding: 10px; box-sizing: border-box; font-size: 13px; }
         .grid { display: grid; grid-template-columns: 85px 1fr 45px; gap: 8px; align-items: center; margin-top: 10px; }
         .grid label { font-size: 12px; font-weight: bold; color: var(--s); text-align: right; }
-        .grid input, .grid select { width: 100%; padding: 7px; border: 1px solid #ccc; border-radius: 4px; font-size: 13px; }
+        .grid input { width: 100%; padding: 7px; border: 1px solid #ccc; border-radius: 4px; font-size: 13px; }
         .btn { border: none; border-radius: 4px; cursor: pointer; padding: 8px; transition: 0.2s; background: var(--s); color: white; }
         .btn:hover { opacity: 0.9; }
-        .btn-main { background: var(--inf); width: 100%; font-weight: bold; padding: 12px; margin: 10px 0; font-size: 14px; border: none; color: white; border-radius: 8px; }
-        .btn-save { background: var(--p); width: 100%; font-weight: bold; margin-top: 10px; }
-        .btn-clear { background: #95a5a6; width: 100%; margin-top: 5px; font-size: 11px; }
+        .btn-main { background: #3498db; width: 100%; font-weight: bold; padding: 12px; margin: 10px 0; font-size: 14px; border: none; color: white; border-radius: 8px; }
+        .btn-save { background: var(--s); width: 100%; font-weight: bold; margin-top: 10px; }
+        .btn-clear { background: #95a5a6; width: 100%; margin-top: 5px; font-size: 11px; color: white; border: none; padding: 5px; border-radius: 4px; width: 100%; cursor: pointer; }
         .opt { grid-column: 1 / span 3; display: flex; justify-content: space-around; background: #f9f9f9; padding: 8px; border-radius: 5px; font-size: 11px; border: 1px solid #eee; margin: 5px 0; }
         table { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 12px; }
         th { background: var(--p); color: white; padding: 10px; text-align: left; }
@@ -30,8 +30,8 @@
 
     <div class="card">
         <h2>1. Dados do Despacho/Bolsa</h2>
-        <textarea id="in" placeholder="Cole o texto do despacho aqui para extrair os dados..."></textarea>
-        <button onclick="processarTexto()" class="btn btn-main">⚡ EXTRAIR DADOS</button>
+        <textarea id="in" placeholder="Cole o texto do SEI aqui..."></textarea>
+        <button onclick="extrairBolsas()" class="btn btn-main">⚡ EXTRAIR DADOS</button>
         
         <div class="grid">
             <label>Processo</label><input type="text" id="processo"> <button class="btn" onclick="copy('processo')">📋</button>
@@ -40,26 +40,27 @@
             <label>REF.</label><input type="text" id="ref"> <button class="btn" onclick="copy('ref')">📋</button>
             <label>Desc. Bolsa</label><input type="text" id="descbolsa"> <button class="btn" onclick="copy('descbolsa')">📋</button>
             <label>Valor R$</label><input type="text" id="valor"> <button class="btn" onclick="copy('valor')">📋</button>
+            <label>Ateste</label><input type="text" id="ateste"> <button class="btn" onclick="copy('ateste')">📋</button>
             <label>FONTE</label><input type="text" id="fonte"> <button class="btn" onclick="copy('fonte')">📋</button>
-            <label>Empenho</label><input type="text" id="empenho"> <button class="btn" onclick="copy('empenho')">📋</button>
             
             <div class="opt">
                 <label><input type="checkbox" id="check_desc" checked> Incluir Desc. Bolsa</label>
                 <label><input type="checkbox" id="check_fonte" checked> Incluir Fonte</label>
             </div>
         </div>
-        <button onclick="limparCampos()" class="btn btn-clear">Limpar Campos</button>
+        <button onclick="limparCampos()" class="btn-clear">Limpar Campos</button>
     </div>
 
     <div class="card">
         <h2>2. Gerar Novo Despacho</h2>
         <div class="actions">
-            <button class="btn" style="flex:1" onclick="gerarDespacho('LIQUIDAÇÃO')">Liquidação</button>
-            <button class="btn" style="flex:1" onclick="gerarDespacho('PAGAMENTO')">Pagamento</button>
-            <button class="btn" style="flex:1" onclick="gerarDespacho('TRIB. FED.')">TRIB</button>
-            <button class="btn" style="flex:1" onclick="gerarDespacho('ISS')">ISS</button>
+            <button class="btn" style="flex:1; background:#34495e" onclick="gerarDespacho('LIQUIDAÇÃO')">Liquidação</button>
+            <button class="btn" style="flex:1; background:#34495e" onclick="gerarDespacho('PAGAMENTO')">Pagamento</button>
+            <button class="btn" style="flex:1; background:#34495e" onclick="gerarDespacho('TRIB')">TRIB</button>
+            <button class="btn" style="flex:1; background:#34495e" onclick="gerarDespacho('ISS')">ISS</button>
         </div>
-        <textarea id="out" style="height: 150px; font-weight: bold; border-color: var(--inf); color: var(--p);"></textarea>
+        <textarea id="out" style="height: 150px; font-weight: bold; border-color: #3498db; color: #2c3e50;"></textarea>
+        <button onclick="copy('out')" class="btn" style="width:100%; background:#2980b9; margin-top:5px; font-weight:bold">📋 COPIAR DESPACHO</button>
         <button onclick="salvarHistorico()" class="btn btn-save">💾 SALVAR NO HISTÓRICO</button>
     </div>
 
@@ -80,82 +81,66 @@
 <script>
     window.onload = atualizarTabela;
 
-    function processarTexto() {
+    function extrairBolsas() {
         const texto = document.getElementById('in').value;
         const regex = {
-            processo: /(?:Processo nº)\s*([\d\.\/\-]+)|(?:Número do Processo:)\s*([\d\.\/\-]+)|\s*\|\s*NÚMERO DO PROCESSO\s*\|\s*([\d\.\/\-]+)/i,
-            emissao: /(?:Data de Emissão.*:)\s*(\d{2}\/\d{2}\/\d{4})|\s*\|\s*Data de Emissão.*\|\s*(\d{2}\/\d{2}\/\d{4})/i,
-            relpg: /(?:Relação de Crédito\s*\((\d+)\))|(?:REL\. PG.*:\s*(.*))|\s*\|\s*REL\. PG.*\s*\|\s*(\d+)/i,
-            ref: /(?:referente ao mês de)\s*([a-zA-ZÇç]+\/\d{4})|(?:REF\..*:)\s*([a-zA-ZÇç]+\/\d{4})|\s*\|\s*REF\..*\|\s*([a-zA-ZÇç]+\/\d{4})/i,
-            descbolsa: /(?:do\s*(Programa de.*?),)|(?:Descrição da Bolsa:\s*(.*))|\s*\|\s*DESCRIÇÃO DA BOLSA\s*\|\s*([^|]+)/i,
-            valor: /(?:valor de)\s*R\$\s*([\d\.\,]+)|(?:Valor Total:)\s*R\$\s*([\d\.\,]+)|\|\s*Valor TOTAL\s*\|\s*R\$\s*([\d\.\,]+)/i,
-            ateste: /(?:\*?\s*Data de Ateste:)\s*(\d{2}\/\d{2}\/\d{4})|\s*\|\s*DATA DE Ateste.*\|\s*(\d{2}\/\d{2}\/\d{4})/i
+            processo: /NÚMERO DO PROCESSO:\s*([\d\.\/\-]+)/i,
+            emissao: /Data de Emissão:\s*(\d{2}\/\d{2}\/\d{4})/i,
+            relpg: /REL\. PG:\s*(\d+)/i,
+            ref: /REF\.:\s*([\w\/]+)/i,
+            descbolsa: /DESCRIÇÃO DA BOLSA:\s*([^]+?)(?=\n[a-z]|$)/i,
+            valor: /Valor TOTAL:\s*R\$\s*([\d\.\,]+)/i,
+            ateste: /DATA DE ATESTE:\s*(\d{2}\/\d{2}\/\d{4})/i
         };
 
         for (const chave in regex) {
             const match = texto.match(regex[chave]);
-            if (match) {
-                const valorCapturado = match[1] || match[2] || match[3] || "";
-                if (valorCapturado) {
-                    document.getElementById(chave === 'ateste' ? 'emissao' : chave).value = valorCapturado.trim();
-                }
+            if (match && match[1]) {
+                document.getElementById(chave).value = match[1].trim();
             }
         }
     }
 
     function gerarDespacho(tipo) {
-        const v = (id) => document.getElementById(id).value || `[${id.toUpperCase()} PENDENTE]`;
+        const v = (id) => document.getElementById(id).value;
         const incluirDesc = document.getElementById('check_desc').checked;
         const incluirFonte = document.getElementById('check_fonte').checked;
 
         let d = `${tipo} DA REL. PG ${v('relpg')} DE ${v('emissao')} - VALOR R$ ${v('valor')} - REF. ${v('ref')}`;
         
-        if(incluirDesc && document.getElementById('descbolsa').value) {
-            d += ` - REF. ${v('descbolsa')}`;
-        }
-        
+        if(incluirDesc && v('descbolsa')) d += ` - REF. ${v('descbolsa')}`;
         d += ` - PROCESSO: ${v('processo')}`;
-        
-        if(incluirFonte && document.getElementById('fonte').value) {
-            d += ` - FONTE: ${v('fonte')}`;
-        }
+        if(incluirFonte && v('fonte')) d += ` - FONTE: ${v('fonte')}`;
 
         document.getElementById('out').value = d.toUpperCase();
     }
 
     async function copy(id) {
-        const val = document.getElementById(id).value;
-        const texto = (id === 'relpg') ? 'REL. PG ' + val : val;
-        await navigator.clipboard.writeText(texto);
+        const el = document.getElementById(id);
+        await navigator.clipboard.writeText(el.value);
+        const originalBg = el.style.backgroundColor;
+        el.style.backgroundColor = "#d4edda";
+        setTimeout(() => el.style.backgroundColor = originalBg, 500);
     }
 
     function salvarHistorico() {
         const despacho = document.getElementById('out').value;
-        if(!despacho) return alert("Gere um despacho primeiro!");
-
-        const reg = {
-            ts: new Date().toLocaleString('pt-BR'),
-            pr: document.getElementById('processo').value,
-            pg: document.getElementById('relpg').value,
-            val: document.getElementById('valor').value,
-            txt: despacho
-        };
-
-        let db = JSON.parse(localStorage.getItem('db_bolsas') || '[]');
+        if(!despacho) return;
+        const reg = { ts: new Date().toLocaleString(), pr: document.getElementById('processo').value, pg: document.getElementById('relpg').value, val: document.getElementById('valor').value, txt: despacho };
+        let db = JSON.parse(localStorage.getItem('db_bolsas_ufcat') || '[]');
         db.unshift(reg);
-        localStorage.setItem('db_bolsas', JSON.stringify(db));
+        localStorage.setItem('db_bolsas_ufcat', JSON.stringify(db));
         atualizarTabela();
     }
 
     function atualizarTabela() {
-        const db = JSON.parse(localStorage.getItem('db_bolsas') || '[]');
-        const b = document.querySelector('#tabelaHistorico tbody');
-        b.innerHTML = db.map(i => `<tr><td>${i.ts}</td><td>${i.pr}</td><td>${i.pg}</td><td>${i.val}</td><td title="${i.txt}">${i.txt.substring(0,60)}...</td></tr>`).join('');
+        const db = JSON.parse(localStorage.getItem('db_bolsas_ufcat') || '[]');
+        document.querySelector('#tabelaHistorico tbody').innerHTML = db.map(i => `<tr><td>${i.ts}</td><td>${i.pr}</td><td>${i.pg}</td><td>${i.val}</td><td title="${i.txt}">${i.txt.substring(0,60)}...</td></tr>`).join('');
     }
 
     function exportarExcel() {
-        const db = JSON.parse(localStorage.getItem('db_bolsas') || '[]');
-        let c = "\uFEFFData;Processo;Rel_PG;Valor;Despacho_Completo\n";
+        const db = JSON.parse(localStorage.getItem('db_bolsas_ufcat') || '[]');
+        let c = "\uFEFFData;Processo;Rel_PG;Valor;Despacho\n";
         db.forEach(i => c += `${i.ts};${i.pr};${i.pg};${i.val};"${i.txt}"\n`);
         const l = document.createElement("a");
         l.href = URL.createObjectURL(new Blob([c], {type:'text/csv'}));
@@ -164,15 +149,10 @@
     }
 
     function limparCampos() {
-        ['in','processo','emissao','relpg','ref','descbolsa','valor','fonte','empenho','out'].forEach(id => document.getElementById(id).value = '');
+        ['in','processo','emissao','relpg','ref','descbolsa','valor','ateste','fonte','out'].forEach(id => document.getElementById(id).value = '');
     }
 
-    function limparBanco() {
-        if(confirm("Deseja apagar todo o histórico de bolsas?")) {
-            localStorage.removeItem('db_bolsas');
-            atualizarTabela();
-        }
-    }
+    function limparBanco() { if(confirm("Apagar histórico?")) { localStorage.removeItem('db_bolsas_ufcat'); atualizarTabela(); } }
 </script>
 </body>
 </html>
